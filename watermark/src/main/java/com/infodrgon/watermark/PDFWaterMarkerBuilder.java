@@ -105,11 +105,15 @@ public class PDFWaterMarkerBuilder {
 		String textMark=twm.getText();
 		BaseFont font =twm.getBaseFont()==null?defaultBaseFont:twm.getBaseFont();
 		Font f = new Font(font,twm.getFontSize());
+		PdfGState gs = new PdfGState();
+		gs.setFillOpacity(twm.getFillOpacity());
+		gs.setStrokeOpacity(twm.getStrokingOpacity());
 		Phrase p = new Phrase(textMark, f);
-		int pageSize = reader.getNumberOfPages();// 原pdf文件的总页数
+		int pageSize = reader.getNumberOfPages()+ 1;// 原pdf文件的总页数
 		for(int i = 1; i <= pageSize; i++) {
-				            under = stamp.getUnderContent(i);// 水印在之前文本下
-//			under = stamp.getOverContent(i);//水印在之前文本上
+//				            under = stamp.getUnderContent(i);// 水印在之前文本下
+			under = stamp.getOverContent(i);//水印在之前文本上
+			under.setGState(gs);
 			under.beginText();
 			under.setColorFill(twm.getFontColor());// 文字水印 颜色
 			under.setTextMatrix(twm.getWidth(), twm.getHeight());// 文字水印 起始位置
@@ -124,8 +128,8 @@ public class PDFWaterMarkerBuilder {
 		BaseFont font =twm.getBaseFont()==null?defaultBaseFont:twm.getBaseFont(); //BaseFont.createFont(twm.getFontPath()+",1", "UniGB-UCS2-H",BaseFont.EMBEDDED);//设置字体
 		Rectangle pageRect = null;
 		PdfGState gs = new PdfGState();
-		gs.setFillOpacity(0.3f);
-		gs.setStrokeOpacity(0.4f);
+		gs.setFillOpacity(twm.getFillOpacity());
+		gs.setStrokeOpacity(twm.getStrokingOpacity());
 		int total = reader.getNumberOfPages() + 1;
 		JLabel label = new JLabel();
 		FontMetrics metrics;
@@ -155,7 +159,7 @@ public class PDFWaterMarkerBuilder {
 
 	private  void mixImagMark(ImageWaterMarker iwm) throws  Exception{
 		PdfGState gs1 = new PdfGState();
-		gs1.setFillOpacity(0.3f);// 透明度设置
+		gs1.setFillOpacity(iwm.getFillOpacity());// 透明度设置
 		Image img = Image.getInstance(iwm.getImagePath()); // 插入图片水印
 		img.setAbsolutePosition(iwm.getWidth(), iwm.getHeight()); // 坐标
 		img.setRotation(iwm.getRotation());// 旋转 弧度
@@ -174,8 +178,8 @@ public class PDFWaterMarkerBuilder {
 
 	private  void mixImagMarkRepeat(ImageWaterMarker iwm) throws  Exception{
 		PdfGState gs1 = new PdfGState();
-		gs1.setFillOpacity(0.3f);// 透明度设置
-		gs1.setStrokeOpacity(0.4f);
+		gs1.setFillOpacity(iwm.getFillOpacity());// 透明度设置
+		gs1.setStrokeOpacity(iwm.getStrokingOpacity());
 		Image img = Image.getInstance(iwm.getImagePath()); // 插入图片水印
 		img.setAbsolutePosition(iwm.getWidth(), iwm.getHeight()); // 坐标
 		img.setRotation(iwm.getRotation());// 旋转 弧度

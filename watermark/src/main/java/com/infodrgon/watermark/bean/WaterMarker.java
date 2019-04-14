@@ -15,6 +15,10 @@ public abstract class WaterMarker {
 	 * 如果是图片时则是图片的旋转弧度
 	 */
 	private int rotation ;
+	
+	private float fillOpacity;
+	
+	private float strokingOpacity;
 	/**
 	 * 是否重复铺满
 	 */
@@ -44,6 +48,18 @@ public abstract class WaterMarker {
 	}
 	public void setRotation(int rotation) {
 		this.rotation = rotation;
+	}
+	public float getFillOpacity() {
+		return fillOpacity;
+	}
+	public void setFillOpacity(float fillOpacity) {
+		this.fillOpacity = fillOpacity;
+	}
+	public float getStrokingOpacity() {
+		return strokingOpacity;
+	}
+	public void setStrokingOpacity(float strokingOpacity) {
+		this.strokingOpacity = strokingOpacity;
 	}
 
 }

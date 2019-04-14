@@ -17,6 +17,11 @@ public abstract  class  BaseWaterMarkBuilder<T,ValueType> {
 	 * 是否重复铺满
 	 */
 	protected boolean repeat ;
+	
+
+	protected float fillOpacity;
+	
+	protected float strokingOpacity;
 
 	protected int waterMarkType;
 	/**
@@ -55,11 +60,31 @@ public abstract  class  BaseWaterMarkBuilder<T,ValueType> {
 		this.repeat=repeat;
 		return (T)this;
 	}
+	/**
+	 * 填充不透明度
+	 * @param fillOpacity
+	 * @return
+	 */
+	public T fillOpacity(float fillOpacity) {
+		this.fillOpacity=fillOpacity;
+		return (T)this;
+	}
+	/**
+	 * 边缘不透明度
+	 * @param strokingOpacity
+	 * @return
+	 */
+	public T strokingOpacity(float strokingOpacity) {
+		this.strokingOpacity=strokingOpacity;
+		return (T)this;
+	}
 	public abstract ValueType build();
 	public void clear() {
 		this.width=0;
 		this.height=0;
 		this.rotation=0;
+		this.fillOpacity=1.0f;
+		this.strokingOpacity=1.0f;
 		this.repeat=false;
 	}
 }
