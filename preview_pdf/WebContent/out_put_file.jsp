@@ -1,3 +1,7 @@
+<%@page import="com.infodrgon.watermark.builder.ImageWaterMarkBuilder"%>
+<%@page import="com.infodrgon.watermark.bean.ImageWaterMarker"%>
+<%@page import="com.infodrgon.watermark.bean.WaterMarker"%>
+<%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@page import="com.itextpdf.text.pdf.BaseFont"%>
@@ -20,11 +24,27 @@
 	try (OutputStream outputStream = response.getOutputStream();) {
 		FileInputStream fileInputStream = new FileInputStream(file);
 		PDFWaterMarkerBuilder pdfbuilder=new PDFWaterMarkerBuilder().pdfIn(fileInputStream).pdfOut(outputStream);
+		
+		/**
+		**文字水印构造
+		**/
 		TextWaterMarkBuilder textWaterMarkBuilder=new TextWaterMarkBuilder();
-		TextWaterMarker twm1= textWaterMarkBuilder.width(50).height(150).fontSize(18).rotation(45).fontColor(BaseColor.BLUE).repeat(true).text("XX国土局").build();
-		textWaterMarkBuilder.clear();
-		TextWaterMarker twm2=textWaterMarkBuilder.width(100).height(200).fontSize(20).rotation(30).fontColor(BaseColor.GRAY).repeat(true).text("InfoDragon").build();
-		pdfbuilder.addWaterMarker(twm1);
+		List twms= textWaterMarkBuilder.x(80).y(800).fontSize(25).fillOpacity(0.8f).strokingOpacity(1f).fontColor(BaseColor.BLUE).text("XX国土局").add()
+				.fontSize(20).rotation(30).fillOpacity(0.5f).strokingOpacity(0.8f).fontColor(BaseColor.GRAY).repeat(true).text("InfoDragon"+"   "+"1434").add()
+				.waterMarkers();
+		pdfbuilder.addWaterMarkers(twms);
+		
+		
+		/**
+		**图片水印构造
+		**/
+		String imagePth=request.getRealPath("") +"logo.jpg";
+		ImageWaterMarkBuilder imageWaterMarkBuilder=new ImageWaterMarkBuilder();
+		List iwms=imageWaterMarkBuilder.x(80).y(5).fillOpacity(0.8f).imagePath(imagePth).rotation(-20).rotationDegree(45).scalePercent(50).add().waterMarkers();
+				//.fillOpacity(1f).strokingOpacity(1f).scalePercent(110).imagePath(imagePth).repeat(true).waterMarkers();
+		pdfbuilder.addWaterMarkers(iwms);
+		
+		
 		pdfbuilder.build();
 		IOUtils.write(IOUtils.toByteArray(fileInputStream), outputStream);
 	} catch (Exception e) {
