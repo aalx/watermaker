@@ -2,15 +2,6 @@ package com.infodrgon.watermark.bean;
 
 public abstract class WaterMarker {
 	/**
-	 * 水印宽度
-	 */
-	private int width;
-	/**
-	 * 水印高度
-	 */
-	private int height;
-	
-	/**
 	 * 旋转角度<br>
 	 * 如果是图片时则是图片的旋转弧度
 	 */
@@ -19,23 +10,15 @@ public abstract class WaterMarker {
 	private float fillOpacity;
 	
 	private float strokingOpacity;
+	
+	private float x;
+	
+	private float y;
 	/**
 	 * 是否重复铺满
 	 */
 	private boolean repeat ;
 	
-	public int getWidth() {
-		return width;
-	}
-	public void setWidth(int width) {
-		this.width = width;
-	}
-	public int getHeight() {
-		return height;
-	}
-	public void setHeight(int height) {
-		this.height = height;
-	}
 	
 	public boolean isRepeat() {
 		return repeat;
@@ -60,6 +43,18 @@ public abstract class WaterMarker {
 	}
 	public void setStrokingOpacity(float strokingOpacity) {
 		this.strokingOpacity = strokingOpacity;
+	}
+	public float getX() {
+		return x;
+	}
+	public void setX(float x) {
+		this.x = x;
+	}
+	public float getY() {
+		return y;
+	}
+	public void setY(float y) {
+		this.y = y;
 	}
 
 }

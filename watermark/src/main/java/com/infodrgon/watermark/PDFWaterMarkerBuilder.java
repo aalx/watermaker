@@ -55,16 +55,18 @@ public class PDFWaterMarkerBuilder {
 	}
 	public PDFWaterMarkerBuilder addWaterMarker(WaterMarker waterMarker) {
 		if(this.waterMarkers==null) {
-			waterMarkers=new ArrayList<WaterMarker>();
+			this.waterMarkers=new ArrayList<WaterMarker>();
 		}
-		waterMarkers.add(waterMarker);
+		this.waterMarkers.add(waterMarker);
 		return this;
 	}
 	public PDFWaterMarkerBuilder addWaterMarkers(List<WaterMarker> waterMarkers) {
-		this.waterMarkers=waterMarkers;
+		if(this.waterMarkers==null) {
+			this.waterMarkers=new ArrayList<WaterMarker>();
+		}
+		this.waterMarkers.addAll(waterMarkers);
 		return this;
 	}
-
 	private static int interval = -5;
 
 
@@ -77,53 +79,41 @@ public class PDFWaterMarkerBuilder {
 		this.stamp = new PdfStamper(reader, this.pdfOut);
 		for(WaterMarker wm:waterMarkers) {
 			if(wm instanceof TextWaterMarker) {
-				/**
-				 * 循环铺满
-				 */
-				if(wm.isRepeat()) {
-					this.mixTextWaterMarkerRepeat((TextWaterMarker)wm);
-				}else {
-					this.mixTextWaterMarker((TextWaterMarker)wm);
-				}
-
+				this.mixTextWaterMarker((TextWaterMarker)wm);
 			}else if(wm instanceof ImageWaterMarker) {
-				if(wm.isRepeat()) {
-					this.mixImagMarkRepeat((ImageWaterMarker)wm);
-				}else {
-					this.mixImagMark((ImageWaterMarker)wm);
-				}
+				this.mixImagMark((ImageWaterMarker)wm);
 			}else {
 				throw new IDWaterMarkerException("不支持的水印类型--->"+wm.getClass().getSimpleName());
 			}
 		}
-		under.endText();
 		stamp.close();
 	}
 
 
-	private void mixTextWaterMarker(TextWaterMarker twm) throws Exception{
-		String textMark=twm.getText();
-		BaseFont font =twm.getBaseFont()==null?defaultBaseFont:twm.getBaseFont();
-		Font f = new Font(font,twm.getFontSize());
-		PdfGState gs = new PdfGState();
-		gs.setFillOpacity(twm.getFillOpacity());
-		gs.setStrokeOpacity(twm.getStrokingOpacity());
-		Phrase p = new Phrase(textMark, f);
-		int pageSize = reader.getNumberOfPages()+ 1;// 原pdf文件的总页数
-		for(int i = 1; i <= pageSize; i++) {
-//				            under = stamp.getUnderContent(i);// 水印在之前文本下
-			under = stamp.getOverContent(i);//水印在之前文本上
-			under.setGState(gs);
-			under.beginText();
-			under.setColorFill(twm.getFontColor());// 文字水印 颜色
-			under.setTextMatrix(twm.getWidth(), twm.getHeight());// 文字水印 起始位置
-			ColumnText.showTextAligned(under, Element.ALIGN_CENTER, p, twm.getWidth(), twm.getHeight(), twm.getRotation());
-//			under.restoreState();
-			//			under.showTextAligned(Element.ALIGN_CENTER, textMark, twm.getWidth(), twm.getHeight(), twm.getRotation());
-		}
-	}
+	//	private void mixTextWaterMarker(TextWaterMarker twm) throws Exception{
+	//		String textMark=twm.getText();
+	//		BaseFont font =twm.getBaseFont()==null?defaultBaseFont:twm.getBaseFont();
+	//		Font f = new Font(font,twm.getFontSize());
+	//		PdfGState gs = new PdfGState();
+	//		gs.setFillOpacity(twm.getFillOpacity());
+	//		gs.setStrokeOpacity(twm.getStrokingOpacity());
+	//		int pageSize = reader.getNumberOfPages();// 原pdf文件的总页数
+	//		for(int i = 1; i <= pageSize; i++) {
+	//			under = stamp.getUnderContent(i);// 水印在之前文本下
+	//			//			under = stamp.getOverContent(i);//水印在之前文本上
+	//			under.saveState();
+	//			under.setGState(gs);
+	//			under.setFontAndSize(font, twm.getFontSize());
+	//			under.setColorFill(twm.getFontColor());// 文字水印 颜色
+	//			under.beginText();
+	////			under.setTextMatrix(twm.getWidth(), twm.getHeight());// 文字水印 起始位置
+	//			//			ColumnText.showTextAligned(under, Element.ALIGN_CENTER, p, twm.getWidth(), twm.getHeight(), twm.getRotation());
+	//			//			under.restoreState();
+	//			under.showTextAligned(Element.ALIGN_CENTER, textMark, twm.getWidth(), twm.getHeight(), twm.getRotation());
+	//		}
+	//	}
 
-	private  void mixTextWaterMarkerRepeat(TextWaterMarker twm) throws Exception {
+	private  void mixTextWaterMarker(TextWaterMarker twm) throws Exception {
 		String markText=twm.getText();
 		BaseFont font =twm.getBaseFont()==null?defaultBaseFont:twm.getBaseFont(); //BaseFont.createFont(twm.getFontPath()+",1", "UniGB-UCS2-H",BaseFont.EMBEDDED);//设置字体
 		Rectangle pageRect = null;
@@ -149,45 +139,32 @@ public class PDFWaterMarkerBuilder {
 			under.setColorFill(twm.getFontColor());// 文字水印 颜色
 			// 水印文字成30度角倾斜  
 			//你可以随心所欲的改你自己想要的角度
-			for (int height = interval + textH; height < pageRect.getHeight();height = height + textH * 3) {
-				for (int width = interval + textW; width < pageRect.getWidth() + textW; width = width + textW * 2) {
-					under.showTextAligned(Element.ALIGN_LEFT, markText, width - textW, height - textH, twm.getRotation());
+			if(twm.isRepeat()) {
+				for (int height = interval + textH; height < pageRect.getHeight();height = height + textH * 3) {
+					for (int width = interval + textW; width < pageRect.getWidth() + textW; width = width + textW * 2) {
+						under.showTextAligned(Element.ALIGN_LEFT, markText, width - textW, height - textH, twm.getRotation());
+					}
 				}
+			}else {
+				under.showTextAligned(Element.ALIGN_CENTER, markText, twm.getX(),twm.getY(), twm.getRotation());
 			}
+			under.endText();  
 		}
 	}
+
+
 
 	private  void mixImagMark(ImageWaterMarker iwm) throws  Exception{
 		PdfGState gs1 = new PdfGState();
 		gs1.setFillOpacity(iwm.getFillOpacity());// 透明度设置
+		gs1.setStrokeOpacity(iwm.getStrokingOpacity());
 		Image img = Image.getInstance(iwm.getImagePath()); // 插入图片水印
-		img.setAbsolutePosition(iwm.getWidth(), iwm.getHeight()); // 坐标
+		img.setAbsolutePosition(iwm.getX(), iwm.getY()); // 坐标
 		img.setRotation(iwm.getRotation());// 旋转 弧度
 		img.setRotationDegrees(iwm.getRotationDegree());// 旋转 角度
 		// img.scaleAbsolute(200,100);//自定义大小
-		// img.scalePercent(50);//依照比例缩放
-		int pageSize = reader.getNumberOfPages();// 原pdf文件的总页数
-		for (int i = 1; i <= pageSize; i++) {
-			under = stamp.getUnderContent(i);// 水印在之前文本下
-			// under = stamp.getOverContent(i);//水印在之前文本上
-			under.setGState(gs1);// 图片水印 透明度
-			under.addImage(img);// 图片水印
-		}
-	}
-
-
-	private  void mixImagMarkRepeat(ImageWaterMarker iwm) throws  Exception{
-		PdfGState gs1 = new PdfGState();
-		gs1.setFillOpacity(iwm.getFillOpacity());// 透明度设置
-		gs1.setStrokeOpacity(iwm.getStrokingOpacity());
-		Image img = Image.getInstance(iwm.getImagePath()); // 插入图片水印
-		img.setAbsolutePosition(iwm.getWidth(), iwm.getHeight()); // 坐标
-		img.setRotation(iwm.getRotation());// 旋转 弧度
-		img.setRotationDegrees(45);// 旋转 角度
-		// img.scaleAbsolute(200,100);//自定义大小
-		// img.scalePercent(50);//依照比例缩放
+		img.scalePercent(iwm.getScalePercent());//依照比例缩放
 		int total = reader.getNumberOfPages() + 1;
-		FontMetrics metrics;
 		int textH = (int) img.getWidth();
 		int textW = (int) img.getHeight();
 		for (int i = 1; i < total; i++) {
@@ -198,27 +175,34 @@ public class PDFWaterMarkerBuilder {
 			under.beginText();
 			// 水印文字成30度角倾斜  
 			//你可以随心所欲的改你自己想要的角度
-			for (int height = interval + textH; height < pageRect.getHeight();height = height + textH * 3) {
-				for (int width = interval + textW; width < pageRect.getWidth() + textW; width = width + textW * 2) {
-					under.addImage(img, iwm.getWidth(), 0, 0, iwm.getHeight(), width - textW, height - textH);
+			if(iwm.isRepeat()) {
+				for (int height = interval + textH; height < pageRect.getHeight();height = height + textH * 3) {
+					for (int width = interval + textW; width < pageRect.getWidth() + textW; width = width + textW * 2) {
+						img.setAbsolutePosition(width - textW, height - textH);//坐标  
+						under.addImage(img);
+					}
 				}
+			}else {
+				img.setAbsolutePosition(iwm.getX(), iwm.getY());
+				under.addImage(img);
 			}
+			under.endText();  
 		}
 	}
 	private static String getChineseFont(){
-        //黑体--在windows下
-        String font ="C:/Windows/Fonts/simhei.ttf";
+		//黑体--在windows下
+		String font ="C:/Windows/Fonts/simsun.ttc";
 
-        //判断系统类型，加载字体文件
-        java.util.Properties prop = System.getProperties();
-        String osName = prop.getProperty("os.name").toLowerCase();
-        // System.out.println(osName);
-        if (osName.indexOf("linux")>-1) {
-            font="/usr/share/fonts/simhei.ttf";
-        }
-        if(!new File(font).exists()){
-            throw new RuntimeException("字体文件不存在,影响导出pdf中文显示！"+font);
-        }
-        return font;
-    }
+		//判断系统类型，加载字体文件
+		java.util.Properties prop = System.getProperties();
+		String osName = prop.getProperty("os.name").toLowerCase();
+		// System.out.println(osName);
+		if (osName.indexOf("linux")>-1) {
+			font="/usr/share/fonts/simsun.ttc";
+		}
+		if(!new File(font).exists()){
+			throw new RuntimeException("字体文件不存在,影响导出pdf中文显示！"+font);
+		}
+		return font+",1";
+	}
 }
