@@ -154,6 +154,7 @@ public class PDFWaterMarkerBuilder {
 
 
 
+
 	private  void mixImagMark(ImageWaterMarker iwm) throws  Exception{
 		PdfGState gs1 = new PdfGState();
 		gs1.setFillOpacity(iwm.getFillOpacity());// 透明度设置
